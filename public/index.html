@@ -8,11 +8,31 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-        </head>
+        <script>
+            // This code only runs in the browser
+            (function() {
+            try {
+                const currentTheme = localStorage.getItem('theme');
+                const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (currentTheme === 'dark' || (!currentTheme && supportDarkMode)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+                } catch (e) {
+                // Handle cases where localStorage is blocked (incognito mode)
+                console.error("Theme preference could not be loaded");
+                }
+            })();
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+            });
+        </script>
+    </head>
     <body>
         <h1><a href="/index.html">Carl Jakob Moritz</a></h1>
         <p>Hey, I'm Jakob, a student of physics and philosophy living in Vienna. 
-        My main research interest is the tension between quantum theory and general relativity. Currently, I'm working on my Master's thesis,
+        My main research interest is the (dialectical) tension between quantum theory and general relativity. Currently, I'm working on my Master's thesis,
         where I'm deriving boundaries for Standard Model Effective Field Theory (SMEFT) dimension 6 operators from the Michel parameters of muon decay.</p>
         <p><a href="/cv.html">About</a></p>
         <p><a href="/CV_Jakob_Moritz.pdf">CV</a></p>

@@ -1,13 +1,13 @@
 :root {
   /* Light mode colors */
-  --bg-color: #fafafa;
+  --bg-color: #fff7fa;
   --text-color: black;
   --link-color: magenta;
 }
 
 [data-theme="dark"] {
   /* Dark mode colors */
-  --bg-color: #121212;
+  --bg-color: #181216;
   --text-color: #ffffff;
   --link-color: magenta;
   --title-color: magenta;

@@ -7,7 +7,7 @@
 
 [data-theme="dark"] {
   /* Dark mode colors */
-  --bg-color: black;
+  --bg-color: #121212;
   --text-color: #ffffff;
   --link-color: magenta;
   --title-color: magenta;

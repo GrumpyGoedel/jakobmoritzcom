@@ -1,0 +1,8 @@
+<svg width="200" height="200" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 50 0 
+           Q 50 50 100 50 
+           Q 50 50 50 100 
+           Q 50 50 0 50 
+           Q 50 50 50 0 Z" 
+        fill="magenta" />
+</svg>

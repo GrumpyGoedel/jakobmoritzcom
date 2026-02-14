@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Analytics - Carl Jakob Moritz</title>
+        <link rel="stylesheet" href="/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+        <link rel="icon" type="image/svg+xml" href="/star.svg">
+        <script>
+            // Theme handling
+            (function() {
+                try {
+                    const currentTheme = localStorage.getItem('theme');
+                    const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                    if (currentTheme === 'dark' || (!currentTheme && supportDarkMode)) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    }
+                } catch (e) {
+                    console.error("Theme preference could not be loaded");
+                }
+            })();
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+            });
+        </script>
+        <style>
+            .analytics-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .controls {
+                margin: 20px 0;
+                display: flex;
+                gap: 15px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .controls label {
+                font-weight: 400;
+            }
+
+            .controls input[type="checkbox"] {
+                margin-left: 5px;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 20px;
+                font-style: italic;
+            }
+
+            .error {
+                color: #ff4444;
+                padding: 20px;
+                border: 1px solid #ff4444;
+                border-radius: 5px;
+                margin: 20px 0;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                font-size: 0.9em;
+            }
+
+            th {
+                text-align: left;
+                padding: 12px 8px;
+                border-bottom: 2px solid var(--link-color);
+                font-weight: 500;
+            }
+
+            td {
+                padding: 10px 8px;
+                border-bottom: 1px solid rgba(255, 0, 255, 0.2);
+            }
+
+            tr:hover {
+                background-color: rgba(255, 0, 255, 0.05);
+            }
+
+            .status-success {
+                color: #4CAF50;
+            }
+
+            .status-redirect {
+                color: #FF9800;
+            }
+
+            .status-error {
+                color: #f44336;
+            }
+
+            .ip-cell {
+                font-family: monospace;
+                font-size: 0.85em;
+            }
+
+            .location-cell {
+                color: var(--link-color);
+                font-weight: 400;
+            }
+
+            .user-agent-cell {
+                max-width: 300px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 0.85em;
+            }
+
+            .footer-nav {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid rgba(255, 0, 255, 0.3);
+            }
+
+            @media (max-width: 768px) {
+                table {
+                    font-size: 0.75em;
+                }
+
+                th, td {
+                    padding: 8px 4px;
+                }
+
+                .user-agent-cell {
+                    max-width: 150px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="analytics-container">
+            <h1><a href="/index.html">Carl Jakob Moritz</a></h1>
+            <h2>Access Log Analytics</h2>
+
+            <div class="controls">
+                <label>
+                    <input type="checkbox" id="autoRefresh"> Auto-refresh (30s)
+                </label>
+                <span id="lastUpdate"></span>
+            </div>
+
+            <div id="content">
+                <div class="loading">Loading analytics data...</div>
+            </div>
+
+            <div class="footer-nav">
+                <p><a href="/index.html">← Back to home</a></p>
+            </div>
+        </div>
+
+        <script>
+            let autoRefreshInterval = null;
+
+            async function loadAnalytics() {
+                const contentDiv = document.getElementById('content');
+
+                try {
+                    const response = await fetch('/analytics?lines=200');
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to load analytics');
+                    }
+
+                    if (data.success && data.entries.length > 0) {
+                        renderTable(data.entries);
+                        document.getElementById('lastUpdate').textContent =
+                            `Last updated: ${new Date().toLocaleTimeString()}`;
+                    } else {
+                        contentDiv.innerHTML = '<p>No log entries found.</p>';
+                    }
+                } catch (error) {
+                    contentDiv.innerHTML = `
+                        <div class="error">
+                            <strong>Error:</strong> ${error.message}
+                            <br><br>
+                            <em>Note: Make sure the nginx access log is readable.
+                            You may need to adjust permissions or run the server with appropriate privileges.</em>
+                        </div>
+                    `;
+                }
+            }
+
+            function renderTable(entries) {
+                const contentDiv = document.getElementById('content');
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>IP</th>
+                                <th>Location</th>
+                                <th>Method</th>
+                                <th>URL</th>
+                                <th>Status</th>
+                                <th>User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                entries.forEach(entry => {
+                    const statusClass = entry.status >= 200 && entry.status < 300 ? 'status-success' :
+                                      entry.status >= 300 && entry.status < 400 ? 'status-redirect' :
+                                      'status-error';
+
+                    const location = entry.location.city && entry.location.country
+                        ? `${entry.location.city}, ${entry.location.country}`
+                        : entry.location.country || 'Unknown';
+
+                    html += `
+                        <tr>
+                            <td>${entry.timestamp}</td>
+                            <td class="ip-cell">${entry.ip}</td>
+                            <td class="location-cell">${location}</td>
+                            <td>${entry.method}</td>
+                            <td>${entry.url}</td>
+                            <td class="${statusClass}">${entry.status}</td>
+                            <td class="user-agent-cell" title="${entry.userAgent}">${entry.userAgent}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.7;">
+                        Showing last ${entries.length} log entries
+                    </p>
+                `;
+
+                contentDiv.innerHTML = html;
+            }
+
+            // Auto-refresh toggle
+            document.getElementById('autoRefresh').addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    autoRefreshInterval = setInterval(loadAnalytics, 30000);
+                } else {
+                    if (autoRefreshInterval) {
+                        clearInterval(autoRefreshInterval);
+                        autoRefreshInterval = null;
+                    }
+                }
+            });
+
+            // Initial load
+            loadAnalytics();
+        </script>
+    </body>
+</html>

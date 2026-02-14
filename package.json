@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.5",
     "express": "^5.2.1",
-    "geoip-lite": "^1.4.10"
+    "geoip-lite": "^1.4.10",
+    "tail": "^2.2.6"
   }
 }
